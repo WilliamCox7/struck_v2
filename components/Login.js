@@ -1,7 +1,9 @@
 import React from 'react';
-import { Text, View, Image, TouchableOpacity, AsyncStorage } from 'react-native';
+import { Linking, Text, View, Image, TouchableOpacity, AsyncStorage, Platform } from 'react-native';
+import SafariView from 'react-native-safari-view';
 import { css } from '../css/Login';
 import Modal from './Modal';
+import axios from 'axios';
 
 class Login extends React.Component {
 
@@ -9,19 +11,60 @@ class Login extends React.Component {
 
   constructor() {
     super();
+    this.state = {
+      user: undefined
+    }
     this.auth = this.auth.bind(this);
+    this.openURL = this.openURL.bind(this);
+    this.handleOpenURL = this.handleOpenURL.bind(this);
   }
 
   componentDidMount() {
     //this.props.navigation.navigate('Home');
+    // Add event listener to handle OAuthLogin:// URLs
+    Linking.addEventListener('url', this.handleOpenURL);
+    // Launched from an external URL
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        this.handleOpenURL({ url });
+      }
+    });
   }
 
-  auth() {
-    //this is where I authorize with fb and get fb info back
-    this.openModal({
-      image: require('../src/profile.jpg'),
-      name: 'William'
+  componentWillUnmount() {
+    // Remove event listener
+    Linking.removeEventListener('url', this.handleOpenURL);
+  };
+
+  handleOpenURL = ({ url }) => {
+    // Extract stringified user string out of the URL
+    const [, user_string] = url.match(/user=([^#]+)/);
+    this.setState({
+      // Decode the user string and parse it into JSON
+      user: JSON.parse(decodeURI(user_string))
     });
+    console.log(JSON.parse(decodeURI(user_string)));
+    if (Platform.OS === 'ios') {
+      SafariView.dismiss();
+    }
+  };
+
+  openURL = (url) => {
+    // Use SafariView on iOS
+    if (Platform.OS === 'ios') {
+      SafariView.show({
+        url: url,
+        fromBottom: true,
+      });
+    }
+    // Or Linking.openURL on Android
+    else {
+      Linking.openURL(url);
+    }
+  };
+
+  auth() {
+    this.openURL('http://192.168.127.143:3000/auth/fb');
   }
 
   openModal(fb) {
