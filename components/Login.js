@@ -2,7 +2,6 @@ import React from 'react';
 import { Linking, Text, View, Image, TouchableOpacity, AsyncStorage, Platform } from 'react-native';
 import SafariView from 'react-native-safari-view';
 import { css } from '../css/Login';
-import Modal from './Modal';
 import axios from 'axios';
 
 class Login extends React.Component {
@@ -64,7 +63,7 @@ class Login extends React.Component {
   };
 
   auth() {
-    this.openURL('http://192.168.127.143:3000/auth/fb');
+    this.openURL('http://localhost:3000/auth/facebook');
   }
 
   openModal(fb) {
@@ -82,7 +81,6 @@ class Login extends React.Component {
             <Text style={css.buttonText}>Login with Facebook</Text>
           </TouchableOpacity>
         </View>
-        <Modal />
       </View>
     );
   }
